@@ -1,0 +1,7 @@
+The aim of Cheesemania is to collect as many pieces of cheese from around the house as you can before the time runs out. But watch out for the cats! If they catch you running about they will eat you!
+
+Make your way around the house and then exit through the other hole in the wall to complete the level.
+
+Scores are calculated as follows:
+	When you collect a cheese score  = 10x (time left on timer)
+	If you exit the room with time to spare, score = 20x (time left on timer)
