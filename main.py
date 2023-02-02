@@ -23,8 +23,13 @@ def main_menu():
 
 def play_screen():
     grid = make_grid()
+    pygame.display.set_caption("CHEESEMANIA")
+    roomlist = []
     for i in range(5):
-        grid = generate_room(grid, rooms, column_no, row_no)
+        grid, roomlist = generate_room(grid, rooms, column_no, row_no)
+
+
+
         # grid = join_rooms(rooms)
 
     while True:
@@ -33,11 +38,15 @@ def play_screen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-
         for row in grid:
             for tile in row:
                 tile.__draw__()
+        for room in roomlist:
+            centrepoint = room.__get_centre__()
+            screen.blit(cheesesprite, centrepoint)
+            screen.blit(catsprite, centrepoint)
 
+        screen.blit(mousesprite,(200,200))
         pygame.display.update()
 
 def rules_screen():
