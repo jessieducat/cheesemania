@@ -15,7 +15,7 @@ colour_orange = (240, 128, 60)
 background_colour = (239, 241, 106)
 black = (0,0,0)
 
-
+gamelength = 60000
 buttonfont = pygame.font.SysFont('Corbel', 35)
 smallfont = pygame.font.SysFont("Corbel", 40)
 titlefont = pygame.font.Font("Strong Brain.ttf", 45)
@@ -26,9 +26,18 @@ backtile = pygame.image.load("background.png")
 cheesesprite = pygame.image.load("cheese-cheese-617686.png")
 cheesesprite = pygame.transform.scale(cheesesprite, (20, 20))
 catsprite = pygame.image.load("sneaky_cat-removebg.png")
-catsprite = pygame.transform.scale(catsprite, (80, 80))
-mousesprite = pygame.image.load("white-mouse-cliparts-219930.png")
-mousesprite = pygame.transform.scale(mousesprite, (50,50))
+catsprite = pygame.transform.scale(catsprite, (40, 40))
+mousesprite = pygame.image.load("mouse down.png")
+mousesprite = pygame.transform.scale(mousesprite, (25,25))
+mouseleftsprite = pygame.image.load("mouse left.png")
+mouseleftsprite = pygame.transform.scale(mouseleftsprite, (25,25))
+mouserightsprite = pygame.image.load("mouse right.png")
+mouserightsprite = pygame.transform.scale(mouserightsprite, (25,25))
+mouseupsprite = pygame.image.load("mouse up.png")
+mouseupsprite = pygame.transform.scale(mouseupsprite, (25,25))
+
+mouse_image = mousesprite
+player_loc =[]
 
 tile_width = 20
 tile_height = 20
@@ -36,3 +45,5 @@ column_no = width // tile_width
 row_no = height // tile_height
 clock = pygame.time.Clock()
 rooms = []
+roomnames = ["a", "b", "c", "d", "e"]
+grid = []

@@ -8,9 +8,10 @@ titletext = titlefont.render("CHEESEMANIA", True, colour_orange)
 lbtitletext = titlefont.render("LEADERBOARD",True, colour_orange)
 leaderboard_text = buttonfont.render("leaderboard", True, colour)
 rules_text = buttonfont.render("rules", True, colour)
-
+MENU_TEXT = titlefont.render("CHEESEMANIA", True, colour_orange)
 
 #rendering rules text
+RULES_TEXT = titlefont.render("RULES", True, colour_orange)
 ruleslist1_text = smallfont.render("The aim of Cheesemania is to collect as", True, colour_orange)
 ruleslist7_text = smallfont.render("many pieces of cheese from around the", True, colour_orange)
 ruleslist8_text = smallfont.render("house as you can before the time runs out. ", True, colour_orange)
