@@ -99,14 +99,18 @@ def play_screen():
             check_collision = cat_rect.colliderect(current_mouse)
             if check_collision:
                 save_score(name, score)
-                pygame.quit()
+                running = False
 
-        for i in range(len(cheeses) -1):
-            screen.blit(cheesesprite, cheeses[i])
-            check_collision = cheeses[i].colliderect(current_mouse)
+        for cheese in cheeses:
+            screen.blit(cheesesprite, cheese)
+            check_collision = cheese.colliderect(current_mouse)
             if check_collision:
-                cheeses.remove(cheeses[i])
+                cheeses.remove(cheese)
                 score = score + (time_remaining * 10)
+            if len(cheeses) == 0:
+                score = score + (time_remaining*20)
+                save_score(name, score)
+                running = False
 
         keys_pressed = pygame.key.get_pressed()
         handle_movement(keys_pressed)
@@ -122,9 +126,12 @@ def play_screen():
 
 def rules_screen():
     pygame.display.set_caption("Rules")
-
-    while True:
+    running = True
+    back_rules_rect = back_text.get_rect(topleft = (30,20))
+    while running:
         screen.fill(background_colour)
+        pygame.draw.rect(screen, colour_dark, back_rules_rect)
+        screen.blit(back_text,(30,20))
         screen.blit(RULES_TEXT, (width / 2 - 100, 80))
         screen.blit(ruleslist1_text, (width / 2 - 350, height / 2 - 240))
         screen.blit(ruleslist7_text, (width / 2 - 350, height / 2 - 210))
@@ -140,8 +147,13 @@ def rules_screen():
         screen.blit(ruleslist5_text, (width / 2 - 350, height / 2 + 180))
         screen.blit(ruleslist13_text, (width / 2 - 350, height / 2 + 210))
         pygame.display.update()
-        for ev in pygame.event.get():
 
+
+        for ev in pygame.event.get():
+            if ev.type == pygame.MOUSEBUTTONDOWN:
+                if back_rules_rect.collidepoint(ev.pos):
+                    running = False
+                    return False
             if ev.type == pygame.QUIT:
                 pygame.quit()
 
@@ -151,13 +163,15 @@ def leaderboard_screen():
     file = open("leaderboard")
     file_text = file.read()
     file_list = file_text.splitlines()
+    running = True
+    back_lb_rect = back_text.get_rect(topleft=(30, 20))
 
     # create list of scores
-
-    while True:
+    while running:
         screen.fill(background_colour)
         screen.blit(lbtitletext, (width / 2 - 170, height / 2 - 220))
-
+        pygame.draw.rect(screen, colour_dark, back_lb_rect)
+        screen.blit(back_text, (30, 20))
         scores = []
         for i in range(len(file_list)):
             scores.append(float(file_list[i].split(":")[1]))
@@ -172,7 +186,10 @@ def leaderboard_screen():
 
         pygame.display.update()
         for ev in pygame.event.get():
-
+            if ev.type == pygame.MOUSEBUTTONDOWN:
+                if back_lb_rect.collidepoint(ev.pos):
+                    running = False
+                    return False
             if ev.type == pygame.QUIT:
                 pygame.quit()
 
@@ -206,19 +223,25 @@ while True:
             # button the game is terminated
             # play button
             if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 - 100 <= mouse[1] <= height / 2 - 60:
-                play_screen()
+                running = True
+                while running:
+                    running = play_screen()
             # quit button
             if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 <= mouse[1] <= height / 2 + 40:
                 pygame.quit()
             # rules button
             if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 + 100 <= mouse[1] <= height / 2 + 140:
-                rules_screen()
+                running = True
+                while running:
+                    running = rules_screen()
             if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 + 200 <= mouse[1] <= height / 2 + 240:
-                leaderboard_screen()
+                running = True
+                while running:
+                    running = leaderboard_screen()
                 # fills the screen with a colour
 
         if ev.type == pygame.KEYDOWN:
-            if ev.key == pygame.K_BACKSLASH:
+            if ev.key == pygame.K_BACKSPACE:
                 name = name[:-1]
             else:
                 name += ev.unicode

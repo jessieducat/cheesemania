@@ -8,6 +8,11 @@ screen = pygame.display.set_mode(res)
 width = screen.get_width()
 height = screen.get_height()
 
+MAX_ROOM_HEIGHT = 20
+MAX_ROOM_WIDTH = 20
+MIN_ROOM_HEIGHT = 8
+MIN_ROOM_WIDTH = 8
+
 colour = (255, 255, 204)
 colour_light = (53, 133, 151)
 colour_dark = (34, 85, 96)

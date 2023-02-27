@@ -25,3 +25,5 @@ ruleslist4_text = smallfont.render("    When you collect a cheese score  = ", Tr
 ruleslist12_text = smallfont.render("10x (time left on timer)", True, colour_orange)
 ruleslist5_text = smallfont.render("    If you exit the room with time to spare,", True, colour_orange)
 ruleslist13_text = smallfont.render("score = 20x (time left on timer)", True, colour_orange)
+
+back_text = smallfont.render(" X ", True, colour)
