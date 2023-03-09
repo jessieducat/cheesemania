@@ -115,6 +115,7 @@ def play_screen():
         keys_pressed = pygame.key.get_pressed()
         handle_movement(keys_pressed)
 
+
         drawdoors(grid, rooms)
         # screen.blit(player.image, (player.x, player.y))
         score_text = smallfont.render("score = " + str(score), True, colour_orange)

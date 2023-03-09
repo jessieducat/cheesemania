@@ -1,7 +1,9 @@
 import pygame
+import random
 from random import randint
 from config import *
 
+random.seed(10)
 
 class room():
     def __init__(self, room_height, room_width, room_x, room_y, name):
@@ -33,12 +35,18 @@ class room():
         return len(self.touchingrooms)
 
     def __get_corners__(self):
-        self.topleft = (self.room_x - 1, self.room_y - 1)
-        self.topright = (self.room_x + self.room_width + 1, self.room_y - 1)
-        self.bottomleft = (self.room_x - 1, self.room_y + self.room_height + 1)
-        self.bottomright = (self.room_x + self.room_width + 1, self.room_y + self.room_height + 1)
-        return self.topleft, self.topright, self.bottomleft, self.bottomright
+        self.topleftcorner = (self.room_x - 1, self.room_y - 1)
+        self.toprightcorner = (self.room_x + self.room_width + 1, self.room_y - 1)
+        self.bottomleftcorner = (self.room_x - 1, self.room_y + self.room_height + 1)
+        self.bottomrightcorner = (self.room_x + self.room_width + 1, self.room_y + self.room_height + 1)
+        return self.topleftcorner, self.toprightcorner, self.bottomleftcorner, self.bottomrightcorner
 
+    def __get_tile_corners__(self):
+        self.topleft = (self.room_x - 1, self.room_y - 1)
+        self.topright = (self.room_x + self.room_width, self.room_y - 1)
+        self.bottomleft = (self.room_x - 1, self.room_y + self.room_height)
+        self.bottomright = (self.room_x + self.room_width, self.room_y + self.room_height)
+        return self.topleft, self.topright, self.bottomleft, self.bottomright
 
 class tile(pygame.Rect):
     def __init__(self, type, x, y):
@@ -81,21 +89,31 @@ def make_grid():
     return grid
 
 
-def room_dims():
+def room_dims(i,column_no,row_no):
     # randomly set room location and dimensions
+    roomA_w = rooms[i-1].room_width
+    roomA_h = rooms[i-1].room_height
+    roomA_x = rooms[i-1].room_x
+    roomA_y = rooms[i - 1].room_y
     r_h = randint(MIN_ROOM_HEIGHT, MAX_ROOM_HEIGHT)
     r_w = randint(MIN_ROOM_WIDTH, MAX_ROOM_WIDTH )
-    r_x = randint(4, column_no - r_w - 2)
-    r_y = randint(4, row_no - r_h - 2)
+    r_x = randint(max(4 , roomA_x-(MAX_ROOM_WIDTH-3)), min((roomA_x+roomA_w+1), column_no - r_w - 2) )
+    r_y = randint(max(4,roomA_y -(MAX_ROOM_HEIGHT-3)), min((roomA_y+roomA_h+1), row_no - r_h - 2))
     return r_h, r_w, r_x, r_y
 
 
 def generate_room(grid, rooms, column_no, row_no, i):
     room_tiles = []
     # creates a new room Rect at random co-ordinates and sizes
-    r_h, r_w, r_x, r_y = room_dims()
+    if len(rooms)==0:
+        r_h = randint(MIN_ROOM_HEIGHT, MAX_ROOM_HEIGHT)
+        r_w = randint(MIN_ROOM_WIDTH, MAX_ROOM_WIDTH)
+        r_x = randint(4, column_no - r_w - 2)
+        r_y = randint(4, row_no - r_h - 2)
+    else:
+        r_h, r_w, r_x, r_y = room_dims(i, column_no, row_no)
     while not attempt_room(grid, r_h, r_w, r_x, r_y):
-        r_h, r_w, r_x, r_y = room_dims()
+        r_h, r_w, r_x, r_y = room_dims(i,column_no, row_no)
     for y in range(r_y, r_y + r_h):
         room_tiles.append([])
         for x in range(r_x, r_x + r_w):
@@ -110,22 +128,23 @@ def generate_room(grid, rooms, column_no, row_no, i):
 
 
 def collide(A, B, grid):
-    Atopleft, Atopright, Abottomleft, Abottomright = A.__get_corners__()
-    Btopleft, Btopright, Bbottomleft, Bbottomright = B.__get_corners__()
+    Atopleft, Atopright, Abottomleft, Abottomright = A.__get_tile_corners__()
+    Btopleft, Btopright, Bbottomleft, Bbottomright = B.__get_tile_corners__()
 
     if Btopright[0] == Atopleft[0]:
         if Atopleft[1] < Btopright[1] < Abottomleft[1]:
+            # WORKING
             touchingwalldistance = Abottomleft[1] - Btopright[1]
             midtouchingwall = (Btopright[0], Btopright[1] + (touchingwalldistance // 2))
             grid[midtouchingwall[1]][midtouchingwall[0]].type = "R"
-            grid[midtouchingwall[1]][midtouchingwall[0] - 1].type = "R"
+            grid[midtouchingwall[1]][midtouchingwall[0] -1].type = "R"
             A.__add_touching_room__(B.__get_name__())
             B.__add_touching_room__(A.__get_name__())
         elif Atopleft[1] < Bbottomright[1] < Abottomleft[1]:
             touchingwalldistance = Bbottomright[1] - Atopleft[1]
             midtouchingwall = (Btopright[0], Atopright[1] + (touchingwalldistance // 2))
             grid[midtouchingwall[1]][midtouchingwall[0]].type = "R"
-            grid[midtouchingwall[1]][midtouchingwall[0] - 1].type = "R"
+            grid[midtouchingwall[1]][midtouchingwall[0] + 1].type = "R"
             A.__add_touching_room__(B.__get_name__())
             B.__add_touching_room__(A.__get_name__())
 
@@ -179,6 +198,7 @@ def collide(A, B, grid):
 
     if Btopright[0] == Atopleft[0] + 1 or Btopright[0] - 1 == Atopleft[0]:
         if Atopleft[1] < Btopright[1] < Abottomleft[1]:
+            # WORKING
             touchingwalldistance = Abottomleft[1] - Btopright[1]
             midtouchingwall = (Btopright[0] -1, Btopright[1] + (touchingwalldistance // 2))
             grid[midtouchingwall[1]][midtouchingwall[0]].type = "R"
@@ -190,18 +210,17 @@ def collide(A, B, grid):
             grid[midtouchingwall[1]][midtouchingwall[0]].type = "R"
             A.__add_touching_room__(B.__get_name__())
             B.__add_touching_room__(A.__get_name__())
-
-    if Bbottomright[1] == Atopright[1] + 1 or Bbottomright[1] - 1 == Atopright[1]:
+    if Bbottomright[1] == Atopright[1] - 1:
         if Atopleft[0] < Bbottomright[0] < Atopright[0]:
             touchingwalldistance = Bbottomright[0] - Atopleft[0]
-            midtouchingwall = (Atopleft[0] + (touchingwalldistance // 2), Atopright[1]+1)
-            grid[midtouchingwall[1]][midtouchingwall[0]].type = "R"
+            midtouchingwall = (Atopleft[0] + (touchingwalldistance // 2), Atopright[1]-1)
+            grid[midtouchingwall[1]][midtouchingwall[0]].type = "B"
             A.__add_touching_room__(B.__get_name__())
             B.__add_touching_room__(A.__get_name__())
         elif Atopleft[0] < Bbottomleft[0] < Atopright[0]:
             touchingwalldistance = Atopright[0] - Bbottomleft[0]
-            midtouchingwall = (Bbottomleft[0] + (touchingwalldistance // 2), Atopright[1])
-            grid[midtouchingwall[1]][midtouchingwall[0]].type = "R"
+            midtouchingwall = (Bbottomleft[0] + (touchingwalldistance // 2), Atopright[1]-1)
+            grid[midtouchingwall[1]][midtouchingwall[0]].type = "B"
             A.__add_touching_room__(B.__get_name__())
             B.__add_touching_room__(A.__get_name__())
 
@@ -213,25 +232,24 @@ def collide(A, B, grid):
             A.__add_touching_room__(B.__get_name__())
             B.__add_touching_room__(A.__get_name__())
         elif Atopright[1] < Bbottomleft[1] < Abottomright[1]:
+            # WORKING
             touchingwalldistance = Bbottomleft[1] - Atopright[1]
             midtouchingwall = (Btopleft[0], Atopleft[1] + (touchingwalldistance // 2))
             grid[midtouchingwall[1]][midtouchingwall[0]].type = "R"
             A.__add_touching_room__(B.__get_name__())
             B.__add_touching_room__(A.__get_name__())
 
-    if Btopright[1] == Abottomright[1] - 1 or Btopright[1]+1 ==Abottomright[1]:
+    if Btopright[1] == Abottomright[1] + 2:
         if Abottomleft[0] < Btopright[0] < Abottomright[0]:
             touchingwalldistance = Btopright[0] - Abottomleft[0]
-            midtouchingwall = (Abottomleft[0] + (touchingwalldistance // 2), Abottomright[1] - 1)
-            grid[midtouchingwall[1]][midtouchingwall[0]].type = "R"
-            grid[midtouchingwall[1] - 1][midtouchingwall[0]].type = "R"
+            midtouchingwall = (Abottomleft[0] + (touchingwalldistance // 2), Abottomright[1] + 1)
+            grid[midtouchingwall[1]][midtouchingwall[0]].type = "B"
             A.__add_touching_room__(B.__get_name__())
             B.__add_touching_room__(A.__get_name__())
         elif Abottomleft[0] < Btopleft[0] < Abottomright[0]:
             touchingwalldistance = Abottomright[0] - Btopleft[0]
-            midtouchingwall = (Btopleft[0] + (touchingwalldistance // 2), Abottomright[1])
-            grid[midtouchingwall[1]][midtouchingwall[0]].type = "R"
-            grid[midtouchingwall[1] - 1][midtouchingwall[0]].type = "R"
+            midtouchingwall = (Btopleft[0] + (touchingwalldistance // 2), Abottomright[1]+1)
+            grid[midtouchingwall[1]][midtouchingwall[0]].type = "B"
             A.__add_touching_room__(B.__get_name__())
             B.__add_touching_room__(A.__get_name__())
 
