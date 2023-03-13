@@ -2,7 +2,6 @@ import pygame
 import pygame.freetype
 import pygame.mouse
 import config
-from button import *
 from sprites import handle_movement
 from sprites import Cat
 from text import *
