@@ -7,6 +7,7 @@ res = (1000, 760)
 screen = pygame.display.set_mode(res)
 width = screen.get_width()
 height = screen.get_height()
+num_rooms = 5
 
 MAX_ROOM_HEIGHT = 20
 MAX_ROOM_WIDTH = 20

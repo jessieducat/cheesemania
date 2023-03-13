@@ -8,7 +8,7 @@ seeds = [1, 10, 3, 4, 5, 9, 73, 17, 94, 81, 100, 84, 74]
 #random.seed(seeds[randomseedint])
 #print(seeds[randomseedint])
 
-random.seed(981) ## this doesnt work
+#random.seed(981) ## this doesnt work
 
 #randomint = random.randint(10, 1000)
 #random.seed(randomint)
@@ -120,12 +120,12 @@ def generate_room(grid, rooms, column_no, row_no, i):
     if len(rooms)==0:
         r_h = randint(MIN_ROOM_HEIGHT, MAX_ROOM_HEIGHT)
         r_w = randint(MIN_ROOM_WIDTH, MAX_ROOM_WIDTH)
-        r_x = randint(4, column_no - r_w - 2)
-        r_y = randint(4, row_no - r_h - 2)
+        r_x = column_no//2-r_w//2
+        r_y = row_no//2-r_h//2
     else:
         r_h, r_w, r_x, r_y = room_dims(i, column_no, row_no)
-    while not attempt_room(grid, r_h, r_w, r_x, r_y):
-        r_h, r_w, r_x, r_y = room_dims(i,column_no, row_no)
+        while not attempt_room(grid, r_h, r_w, r_x, r_y):
+            r_h, r_w, r_x, r_y = room_dims(i,column_no, row_no)
     for y in range(r_y, r_y + r_h):
         room_tiles.append([])
         for x in range(r_x, r_x + r_w):
@@ -295,10 +295,9 @@ def collide(A, B, grid):
             B.__add_touching_room__(A.__get_name__())
 
 
-
 def drawdoors(grid, rooms):
-    for i in range(5):
-        for j in range(i, 5):
+    for i in range(num_rooms):
+        for j in range(i, num_rooms):
             if rooms[i] != rooms[j]:
                 collide(rooms[i], rooms[j], grid)
 
@@ -310,7 +309,26 @@ def attempt_room(grid, r_h, r_w, r_x, r_y):
             if grid[y][x].type == "R" or grid[y][x].type == "W":
                 return False
 
-    return True
+    touch = touching_rooms(r_h, r_w, r_x, r_y, rooms)
+    return touch
+
+
+def touching_rooms(r_h, r_w, r_x, r_y, rooms):
+    A_bottomright = (r_x + r_w, r_y + r_h)
+    A_topleft = (r_x, r_y)
+    print("touching")
+    for room in rooms:
+        B_topleft, _, _, B_bottomright = room.__get_tile_corners__()
+        if A_bottomright[0] >= B_topleft[0] and A_topleft[0] <= B_bottomright[0] and A_bottomright[1] == B_topleft[1]:
+            return True
+        elif A_bottomright[1] >= B_topleft[1] and A_topleft[1] <= B_bottomright[1] and A_bottomright[0]==B_topleft[0]:
+            return True
+        elif A_bottomright[0] >= B_topleft[0] and A_topleft[0] <= B_bottomright[0] and B_bottomright[1] == A_topleft[1]:
+            return True
+        elif A_bottomright[1] >= B_topleft[1] and A_topleft[1] <= B_bottomright[1] and B_bottomright[0]==A_topleft[0]:
+            return True
+    print("touching false")
+    return False
 
 
 def wallify(grid, r_h, r_w, r_x, r_y):

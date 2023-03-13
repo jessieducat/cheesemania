@@ -39,7 +39,7 @@ def play_screen():
     pygame.display.set_caption("CHEESEMANIA")
     roomlist = []
     score = 0
-    for i in range(5):
+    for i in range(num_rooms):
         grid, roomlist = generate_room(grid, rooms, column_no, row_no, i)
         # grid = join_rooms(rooms)
 
@@ -79,7 +79,7 @@ def play_screen():
 
         if current_time - start_time > config.gamelength:
             save_score(name, score)
-            pygame.quit()
+            running = False
 
         clock.tick(60)
         for event in pygame.event.get():
@@ -91,7 +91,7 @@ def play_screen():
 
         current_mouse = config.grid[config.player_loc[0]][config.player_loc[1]]
 
-        for i in range(5):
+        for i in range(num_rooms):
             cats[i].display()
             cats[i].movement()
             cat_rect = cats[i].image.get_rect(x=cats[i].x, y=cats[i].y)
@@ -199,6 +199,7 @@ name_text = smallfont.render(name, True, colour)
 name_rect = name_text.get_rect(x=200, y=280)
 active = False
 invalid = False
+
 
 while True:
     screen.fill(background_colour)
