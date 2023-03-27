@@ -1,4 +1,3 @@
-import pygame
 from config import *
 
 #rendering button texts on main page
@@ -27,3 +26,5 @@ ruleslist5_text = smallfont.render("    If you complete the level with time to s
 ruleslist13_text = smallfont.render("score = 20x (time left on timer)", True, colour_orange)
 
 back_text = smallfont.render(" X ", True, colour)
+game_over_text = titlefont.render("GAME OVER", True, colour_orange)
+win_text = titlefont.render("YOU WIN", True, colour_orange)

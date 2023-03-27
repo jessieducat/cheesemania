@@ -1,4 +1,3 @@
-import pygame
 import pygame.freetype
 import pygame.mouse
 import config
@@ -34,104 +33,116 @@ def main_menu():
         play_button = button(colour, colour_light, (width / 2 - 35, height / 2 - 100), 140, 40, text='Play')
 
 
-def play_screen():
-    grid = make_grid()
-    pygame.display.set_caption("CHEESEMANIA")
-    roomlist = []
-    score = 0
-    for i in range(num_rooms):
-        grid, roomlist = generate_room(grid, rooms, column_no, row_no, i)
-        # grid = join_rooms(rooms)
+class PlayScreen:
+    def __init__(self):
+        self.running = True
 
-    first_room = rooms[0]
-    first_room_tiles = first_room.tiles
-    first_room_tiles[4][4].type = "P"
-    first_room_first_tile = first_room_tiles[4][4]
-    first_room_row = int(first_room_first_tile.y / 20)
-    postition = grid[first_room_row].index(first_room_first_tile)
-    config.player_loc.append(first_room_row)
-    config.player_loc.append(postition)
-
-    cats = []
-    cheeses = []
-    for room in roomlist:
-        centrepoint = room.__get_centre__()
-        new_cheese = cheesesprite.get_rect()
-        new_cheese.x = centrepoint[0]
-        new_cheese.y = centrepoint[1]
-        cheeses.append(new_cheese)
-
-        corners = room.__get_corners__()
-        new_cat = Cat((corners[0][0] + 1) * 20, (corners[0][1] + 1) * 20, corners)
-        cats.append(new_cat)
-
-    first_loop = True
-    if first_loop:
-        start_time = pygame.time.get_ticks()
-        first_loop = False
-
-    running = True
-
-    while running:
-
-        current_time = pygame.time.get_ticks()
-        time_remaining = round(((config.gamelength - (current_time - start_time)) / 1000), 1)
-
-        if current_time - start_time > config.gamelength:
-            save_score(name, score)
-            running = False
-
-        clock.tick(60)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-        for row in grid:
-            for tile in row:
-                tile.__draw__()
-
-        current_mouse = config.grid[config.player_loc[0]][config.player_loc[1]]
-
+    def play_screen(self):
+        grid = make_grid()
+        pygame.display.set_caption("CHEESEMANIA")
+        roomlist = []
+        score = 0
         for i in range(num_rooms):
-            cats[i].display()
-            cats[i].movement()
-            cat_rect = cats[i].image.get_rect(x=cats[i].x, y=cats[i].y)
-            check_collision = cat_rect.colliderect(current_mouse)
-            if check_collision:
+            grid, roomlist = generate_room(grid, rooms, column_no, row_no, i)
+            # grid = join_rooms(rooms)
+
+        first_room = rooms[0]
+        first_room_tiles = first_room.tiles
+        first_room_tiles[4][4].type = "P"
+        first_room_first_tile = first_room_tiles[4][4]
+        first_room_row = int(first_room_first_tile.y / 20)
+        postition = grid[first_room_row].index(first_room_first_tile)
+        config.player_loc.append(first_room_row)
+        config.player_loc.append(postition)
+
+        cats = []
+        cheeses = []
+        for room in roomlist:
+            centrepoint = room.__get_centre__()
+            new_cheese = cheesesprite.get_rect()
+            new_cheese.x = centrepoint[0]
+            new_cheese.y = centrepoint[1]
+            cheeses.append(new_cheese)
+
+            corners = room.__get_corners__()
+            new_cat = Cat((corners[0][0] + 1) * 20, (corners[0][1] + 1) * 20, corners)
+            cats.append(new_cat)
+
+        first_loop = True
+        if first_loop:
+            start_time = pygame.time.get_ticks()
+            first_loop = False
+
+
+
+        while self.running:
+
+            current_time = pygame.time.get_ticks()
+            time_remaining = round(((config.gamelength - (current_time - start_time)) / 1000), 1)
+
+            if current_time - start_time > config.gamelength:
+                win = False
                 save_score(name, score)
-                running = False
+                end = EndGame(score, win)
+                end.screen_loop(win)
+                return win
 
-        for cheese in cheeses:
-            screen.blit(cheesesprite, cheese)
-            check_collision = cheese.colliderect(current_mouse)
-            if check_collision:
-                cheeses.remove(cheese)
-                score = score + (time_remaining * 10)
-            if len(cheeses) == 0:
-                score = score + (time_remaining*20)
-                save_score(name, score)
-                running = False
+            clock.tick(60)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+            for row in grid:
+                for tile in row:
+                    tile.__draw__()
 
-        keys_pressed = pygame.key.get_pressed()
-        handle_movement(keys_pressed)
+            current_mouse = config.grid[config.player_loc[0]][config.player_loc[1]]
 
+            for i in range(num_rooms):
+                cats[i].display()
+                cats[i].movement()
+                cat_rect = cats[i].image.get_rect(x=cats[i].x, y=cats[i].y)
+                check_collision = cat_rect.colliderect(current_mouse)
+                if check_collision:
+                    win = False
+                    save_score(name, score)
+                    end = EndGame(score, win)
+                    end.screen_loop(win)
+                    return win
 
-        drawdoors(grid, rooms)
-        # screen.blit(player.image, (player.x, player.y))
-        score_text = smallfont.render("score = " + str(score), True, colour_orange)
-        screen.blit(score_text, (80, 10))
-        time_text = smallfont.render("time remaining = " + str(time_remaining), True, colour_orange)
-        screen.blit(time_text, (400, 10))
-        pygame.display.update()
+            for cheese in cheeses:
+                screen.blit(cheesesprite, cheese)
+                check_collision = cheese.colliderect(current_mouse)
+                if check_collision:
+                    cheeses.remove(cheese)
+                    score = score + (time_remaining * 10)
+                if len(cheeses) == 0:
+                    score = score + (time_remaining * 20)
+                    save_score(name, score)
+                    win = True
+                    end = EndGame(score, win)
+                    end.screen_loop(win)
+                    return win
+
+            keys_pressed = pygame.key.get_pressed()
+            handle_movement(keys_pressed)
+
+            drawdoors(grid, rooms)
+            # screen.blit(player.image, (player.x, player.y))
+            score_text = smallfont.render("score = " + str(score), True, colour_orange)
+            screen.blit(score_text, (80, 10))
+            time_text = smallfont.render("time remaining = " + str(time_remaining), True, colour_orange)
+            screen.blit(time_text, (400, 10))
+            pygame.display.update()
 
 
 def rules_screen():
     pygame.display.set_caption("Rules")
     running = True
-    back_rules_rect = back_text.get_rect(topleft = (30,20))
+    back_rules_rect = back_text.get_rect(topleft=(30, 20))
     while running:
         screen.fill(background_colour)
         pygame.draw.rect(screen, colour_dark, back_rules_rect)
-        screen.blit(back_text,(30,20))
+        screen.blit(back_text, (30, 20))
         screen.blit(RULES_TEXT, (width / 2 - 100, 80))
         screen.blit(ruleslist1_text, (width / 2 - 350, height / 2 - 240))
         screen.blit(ruleslist7_text, (width / 2 - 350, height / 2 - 210))
@@ -147,7 +158,6 @@ def rules_screen():
         screen.blit(ruleslist5_text, (width / 2 - 350, height / 2 + 180))
         screen.blit(ruleslist13_text, (width / 2 - 350, height / 2 + 210))
         pygame.display.update()
-
 
         for ev in pygame.event.get():
             if ev.type == pygame.MOUSEBUTTONDOWN:
@@ -182,7 +192,8 @@ def leaderboard_screen():
         for i in range(10):
             indices.append(scores.index(sorted_scores[i]))
         for i in range(len(indices)):
-            screen.blit(smallfont.render((str(i + 1) + ". " + file_list[indices[i]]), True, colour_orange), (150, 250 + (i * 45)))
+            screen.blit(smallfont.render((str(i + 1) + ". " + file_list[indices[i]]), True, colour_orange),
+                        (150, 250 + (i * 45)))
 
         pygame.display.update()
         for ev in pygame.event.get():
@@ -201,101 +212,140 @@ active = False
 invalid = False
 
 
-while True:
-    screen.fill(background_colour)
-    mouse = pygame.mouse.get_pos()
+class EndGame:
+    def __init__(self, score, win):
+        self.screen = pygame.display.set_mode(res)
+        self.running = True
+        self.score_text = smallfont.render(("score = "+ str(score)), True, colour_orange)
+        self.lb_text_end = smallfont.render("leaderboard", True, colour_orange)
+        self.button = self.lb_text_end.get_rect()
+        self.button.x = width / 2 - 150
+        self.button.y = height / 2 + 50
+        self.win = win
 
-    for ev in pygame.event.get():
-
-        if ev.type == pygame.QUIT:
-            pygame.quit()
-
-            # checks if a mouse is clicked
-        if ev.type == pygame.MOUSEBUTTONDOWN:
-
-            if name_rect.collidepoint(ev.pos):
-                active = True
-                if name == "Click to edit":
-                    name = ""
-                else:
-                    active = False
-
-            # if the mouse is clicked on the
-            # button the game is terminated
-            # play button
-            if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 - 100 <= mouse[1] <= height / 2 - 60:
-                running = True
-                while running:
-                    running = play_screen()
-            # quit button
-            if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 <= mouse[1] <= height / 2 + 40:
-                pygame.quit()
-            # rules button
-            if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 + 100 <= mouse[1] <= height / 2 + 140:
-                running = True
-                while running:
-                    running = rules_screen()
-            if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 + 200 <= mouse[1] <= height / 2 + 240:
-                running = True
-                while running:
-                    running = leaderboard_screen()
-                # fills the screen with a colour
-
-        if ev.type == pygame.KEYDOWN:
-            if ev.key == pygame.K_BACKSPACE:
-                name = name[:-1]
+    def screen_loop(self, win):
+        while self.running:
+            mouse = pygame.mouse.get_pos()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.button.collidepoint(event.pos):
+                        running = True
+                        while running:
+                            running = leaderboard_screen()
+            self.screen.fill(background_colour)
+            self.screen.blit(self.score_text, (width / 2 - 150, height / 2 ))
+            if self.win:
+                self.screen.blit(win_text, (width / 2 - 170, height / 2 - 120))
             else:
-                name += ev.unicode
+                self.screen.blit(game_over_text, (width / 2 - 170, height / 2 - 120))
+            self.screen.blit(self.lb_text_end, (width / 2 - 150, (height / 2) + 50))
+            pygame.display.update()
 
-        name_text = smallfont.render(name, True, colour)
 
-    # stores the (x,y) coordinates into
-    # the variable as a tuple
+class Game:
 
-    # if mouse is hovered on a button it
-    # changes to lighter shade
+    def game(self, active, name, name_text):
+        while True:
+            screen.fill(background_colour)
+            mouse = pygame.mouse.get_pos()
 
-    if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 <= mouse[1] <= height / 2 + 40:
-        pygame.draw.rect(screen, colour_light, [width / 2 - 70, height / 2, 140, 40])
+            for ev in pygame.event.get():
 
-    else:
-        pygame.draw.rect(screen, colour_dark, [width / 2 - 70, height / 2, 140, 40])
+                if ev.type == pygame.QUIT:
+                    pygame.quit()
 
-    if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 - 100 <= mouse[1] <= height / 2 - 100 + 40:
-        pygame.draw.rect(screen, colour_light, [width / 2 - 70, height / 2 - 100, 140, 40])
+                    # checks if a mouse is clicked
+                if ev.type == pygame.MOUSEBUTTONDOWN:
 
-    else:
-        pygame.draw.rect(screen, colour_dark, [width / 2 - 70, height / 2 - 100, 140, 40])
+                    if name_rect.collidepoint(ev.pos):
+                        active = True
+                        if name == "Click to edit":
+                            name = ""
+                        else:
+                            active = False
 
-    if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 + 100 <= mouse[1] <= height / 2 + 100 + 40:
-        pygame.draw.rect(screen, colour_light, [width / 2 - 70, (height / 2) + 100, 140, 40])
+                    # if the mouse is clicked on the button the game is terminated
 
-    else:
-        pygame.draw.rect(screen, colour_dark, [width / 2 - 70, (height / 2) + 100, 140, 40])
+                    # play button
+                    if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 - 100 <= mouse[1] <= height / 2 - 60:
+                        new_play = PlayScreen()
+                        while new_play.running:
+                            new_play.play_screen()
+                    # quit button
+                    if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 <= mouse[1] <= height / 2 + 40:
+                        pygame.quit()
+                    # rules button
+                    if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 + 100 <= mouse[1] <= height / 2 + 140:
+                        running = True
+                        while running:
+                            running = rules_screen()
+                    if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 + 200 <= mouse[1] <= height / 2 + 240:
+                        running = True
+                        while running:
+                            running = leaderboard_screen()
+                        # fills the screen with a colour
 
-    if width / 2 - 100 <= mouse[0] <= width / 2 + 100 and height / 2 + 200 <= mouse[1] <= height / 2 + 200 + 40:
-        pygame.draw.rect(screen, colour_light, [width / 2 - 100, (height / 2) + 200, 200, 40])
+                if ev.type == pygame.KEYDOWN:
+                    if ev.key == pygame.K_BACKSPACE:
+                        name = name[:-1]
+                    else:
+                        name += ev.unicode
 
-    else:
-        pygame.draw.rect(screen, colour_dark, [width / 2 - 100, (height / 2) + 200, 200, 40])
+                name_text = smallfont.render(name, True, colour)
 
-        # superimposing the text onto our button
-    screen.blit(quittext, (width / 2 - 35, height / 2))
-    screen.blit(playtext, (width / 2 - 35, height / 2 - 100))
-    screen.blit(titletext, (width / 2 - 170, height / 2 - 220))
-    screen.blit(rules_text, (width / 2 - 35, (height / 2) + 100))
-    screen.blit(leaderboard_text, (width / 2 - 80, (height / 2) + 200,))
+            # stores the (x,y) coordinates into
+            # the variable as a tuple
 
-    # name input
-    if active:
-        pygame.draw.rect(screen, colour_light, name_rect)
-    else:
-        pygame.draw.rect(screen, colour_dark, name_rect)
-    screen.blit(name_text, (200, 280))
+            # if mouse is hovered on a button it
+            # changes to lighter shade
 
-    # updates the frames of the game
-    pygame.display.update()
+            if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 <= mouse[1] <= height / 2 + 40:
+                pygame.draw.rect(screen, colour_light, [width / 2 - 70, height / 2, 140, 40])
 
-self.screen.blit(titletext, (width / 2 - 170, height / 2 - 220))
+            else:
+                pygame.draw.rect(screen, colour_dark, [width / 2 - 70, height / 2, 140, 40])
 
-pygame.display.set_caption("Cheesemania")
+            if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 - 100 <= mouse[1] <= height / 2 - 100 + 40:
+                pygame.draw.rect(screen, colour_light, [width / 2 - 70, height / 2 - 100, 140, 40])
+
+            else:
+                pygame.draw.rect(screen, colour_dark, [width / 2 - 70, height / 2 - 100, 140, 40])
+
+            if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 + 100 <= mouse[1] <= height / 2 + 100 + 40:
+                pygame.draw.rect(screen, colour_light, [width / 2 - 70, (height / 2) + 100, 140, 40])
+
+            else:
+                pygame.draw.rect(screen, colour_dark, [width / 2 - 70, (height / 2) + 100, 140, 40])
+
+            if width / 2 - 100 <= mouse[0] <= width / 2 + 100 and height / 2 + 200 <= mouse[1] <= height / 2 + 200 + 40:
+                pygame.draw.rect(screen, colour_light, [width / 2 - 100, (height / 2) + 200, 200, 40])
+
+            else:
+                pygame.draw.rect(screen, colour_dark, [width / 2 - 100, (height / 2) + 200, 200, 40])
+
+                # superimposing the text onto our button
+            screen.blit(quittext, (width / 2 - 35, height / 2))
+            screen.blit(playtext, (width / 2 - 35, height / 2 - 100))
+            screen.blit(titletext, (width / 2 - 170, height / 2 - 220))
+            screen.blit(rules_text, (width / 2 - 35, (height / 2) + 100))
+            screen.blit(leaderboard_text, (width / 2 - 80, (height / 2) + 200,))
+
+            # name input
+            if active:
+                pygame.draw.rect(screen, colour_light, name_rect)
+            else:
+                pygame.draw.rect(screen, colour_dark, name_rect)
+            screen.blit(name_text, (200, 280))
+
+            # updates the frames of the game
+            pygame.display.update()
+
+        self.screen.blit(titletext, (width / 2 - 170, height / 2 - 220))
+
+        pygame.display.set_caption("Cheesemania")
+
+
+game = Game()
+game.game(active, name, name_text)

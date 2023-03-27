@@ -310,22 +310,6 @@ def attempt_room(grid, r_h, r_w, r_x, r_y):
     return True
 
 
-def touching_rooms(r_h, r_w, r_x, r_y, rooms):
-    A_bottomright = (r_x + r_w, r_y + r_h)
-    A_topleft = (r_x, r_y)
-    for room in rooms:
-        B_topleft, _, _, B_bottomright = room.__get_tile_corners__()
-        if A_bottomright[0] >= B_topleft[0] and A_topleft[0] <= B_bottomright[0] and A_bottomright[1] == B_topleft[1]:
-            return True
-        elif A_bottomright[1] >= B_topleft[1] and A_topleft[1] <= B_bottomright[1] and A_bottomright[0] == B_topleft[0]:
-            return True
-        elif A_bottomright[0] >= B_topleft[0] and A_topleft[0] <= B_bottomright[0] and B_bottomright[1] == A_topleft[1]:
-            return True
-        elif A_bottomright[1] >= B_topleft[1] and A_topleft[1] <= B_bottomright[1] and B_bottomright[0] == A_topleft[0]:
-            return True
-    return False
-
-
 def wallify(grid, r_h, r_w, r_x, r_y):
     # draw walls around the edge of the room
     for x in range(r_x - 1, r_x + r_w + 1):

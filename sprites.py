@@ -57,7 +57,7 @@ class Cat():
         self.BottomRight = (20*(self.corners[3][0]-1), 20*(self.corners[3][1]-1))
 
     def display(self):
-        config.screen.blit(config.catsprite, (self.x, self.y))
+        config.screen.blit(self.image, (self.x, self.y))
 
     def movement(self):
         if self.x+40 < self.TopRight[0] and self.y == self.TopLeft[1]:
