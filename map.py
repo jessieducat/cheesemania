@@ -17,7 +17,7 @@ print(seeds[randomseedint])
 #print(randomint)
 
 
-class room():
+class Room():
     def __init__(self, room_height, room_width, room_x, room_y, name):
         self.room_height = room_height
         self.room_width = room_width
@@ -61,7 +61,7 @@ class room():
         return self.topleft, self.topright, self.bottomleft, self.bottomright
 
 
-class tile(pygame.Rect):
+class Tile(pygame.Rect):
     def __init__(self, type, x, y):
         super().__init__(self)
         self.x = x
@@ -98,7 +98,7 @@ def make_grid():
     for y in range(row_no):
         grid.append([])
         for x in range(column_no):
-            grid[y].append(tile("B", x * tile_width, y * tile_height))
+            grid[y].append(Tile("B", x * tile_width, y * tile_height))
     return grid
 
 
@@ -134,7 +134,7 @@ def generate_room(grid, rooms, column_no, row_no, i):
             room_tiles[y - r_y].append(grid[y][x])
 
     grid = wallify(grid, r_h, r_w, r_x, r_y)
-    new_room = room(r_h, r_w, r_x, r_y, roomnames[i])
+    new_room = Room(r_h, r_w, r_x, r_y, roomnames[i])
     new_room.__add_tiles__(room_tiles)
     rooms.append(new_room)
     return grid, rooms

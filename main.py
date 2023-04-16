@@ -37,7 +37,7 @@ class PlayScreen:
     def __init__(self):
         self.running = True
 
-    def play_screen(self):
+    def play_screen(self, name):
         grid = make_grid()
         pygame.display.set_caption("CHEESEMANIA")
         roomlist = []
@@ -272,7 +272,7 @@ class Game:
                     if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 - 100 <= mouse[1] <= height / 2 - 60:
                         new_play = PlayScreen()
                         while new_play.running:
-                            new_play.play_screen()
+                            new_play.play_screen(name)
                     # quit button
                     if width / 2 - 70 <= mouse[0] <= width / 2 + 70 and height / 2 <= mouse[1] <= height / 2 + 40:
                         pygame.quit()
